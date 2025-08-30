@@ -1,0 +1,42 @@
+{
+    "no_docstring": {
+        "mild": ["No docstring for {name}? Did you forget to add it while sipping chai?"],
+        "medium": ["No docstring for {name}? Guess we'll decode it like a Sanskrit manuscript."],
+        "brutal": ["No docstring for {name}? Did you think maintainers have telepathy or what?"]
+    },
+    "single_letter_var": {
+        "mild": ["Variable '{name}'? Even my nani would pick a better name."],
+        "medium": ["Single-letter '{name}'? Are we coding or playing Ludo with names?"],
+        "brutal": ["'{name}' as a variable? Did you borrow your naming skills from a toddler?"]
+    },
+    "generic_var": {
+        "mild": ["'{name}' as a variable? A bit too generic, like a roadside dosa."],
+        "medium": ["Oh, '{name}'? Did you pick it from a 90s Bollywood script?"],
+        "brutal": ["'{name}' for a variable? As creative as a Mumbai pothole!"]
+    },
+    "long_function": {
+        "mild": ["Function '{name}' is a bit long, like a slow train to Pune."],
+        "medium": ["'{name}' is longer than a Mumbai-Pune expressway journey."],
+        "brutal": ["'{name}' is an epic saga, not a function! Did you write a novel?"]
+    },
+    "excessive_nesting": {
+        "mild": ["Nesting depth {depth}? Getting a bit deep, like a Chennai well."],
+        "medium": ["{depth} levels of nesting? Are you coding or building a Matryoshka doll?"],
+        "brutal": ["Nesting depth {depth}? Your code is more tangled than a Delhi power line!"]
+    },
+    "high_complexity": {
+        "mild": ["Complexity {score} in '{name}'? A bit tricky, like a street market bargain."],
+        "medium": ["Complexity {score} in '{name}'? More twisted than a Kolkata tram route."],
+        "brutal": ["'{name}' with complexity {score}? Did you write this during a Kumbh Mela stampede?"]
+    },
+    "low_maintainability": {
+        "mild": ["Maintainability index {score}? Needs more clarity than a foggy Delhi morning."],
+        "medium": ["Score {score} for maintainability? Harder to maintain than a Delhi metro rush."],
+        "brutal": ["{score} maintainability? Even a chaiwallah would write clearer code!"]
+    },
+    "pylint": {
+        "mild": ["{issue}? A small oops, like spilling chai on your keyboard."],
+        "medium": ["{issue}? Your code is screaming louder than a Diwali firecracker."],
+        "brutal": ["{issue}? This code deserves a spot in a coding horror museum!"]
+    }
+}
