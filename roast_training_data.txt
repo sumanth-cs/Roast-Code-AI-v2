@@ -1,24 +1,24 @@
-No docstring for example? Did you forget to add it while sipping chai?
-No docstring for example? Guess we'll decode it like a Sanskrit manuscript.
-No docstring for example? Did you think maintainers have telepathy or what?
-Variable 'example'? Even my nani would pick a better name.
-Single-letter 'example'? Are we coding or playing Ludo with names?
-'example' as a variable? Did you borrow your naming skills from a toddler?
-'example' as a variable? A bit too generic, like a roadside dosa.
-Oh, 'example'? Did you pick it from a 90s Bollywood script?
-'example' for a variable? As creative as a Mumbai pothole!
-Function 'example' is a bit long, like a slow train to Pune.
-'example' is longer than a Mumbai-Pune expressway journey.
-'example' is an epic saga, not a function! Did you write a novel?
-Nesting depth 3? Getting a bit deep, like a Chennai well.
-3 levels of nesting? Are you coding or building a Matryoshka doll?
-Nesting depth 3? Your code is more tangled than a Delhi power line!
-Complexity 10 in 'example'? A bit tricky, like a street market bargain.
-Complexity 10 in 'example'? More twisted than a Kolkata tram route.
-'example' with complexity 10? Did you write this during a Kumbh Mela stampede?
-Maintainability index 10? Needs more clarity than a foggy Delhi morning.
-Score 10 for maintainability? Harder to maintain than a Delhi metro rush.
-10 maintainability? Even a chaiwallah would write clearer code!
-example issue? A small oops, like spilling chai on your keyboard.
-example issue? Your code is screaming louder than a Diwali firecracker.
-example issue? This code deserves a spot in a coding horror museum!
+No docstring for example? Did you forget documentation exists?
+No docstring for example? Are you allergic to explaining your code?
+No docstring for example? Might as well write code in invisible ink!
+Variable 'example'? Even a newbie would name it better.
+Single-letter 'example'? What, ran out of keyboard keys?
+'example' as a variable? Did a cat walk over your keyboard?
+'example' as a variable? A bit too generic, like calling a dog 'Dog'.
+Oh, 'example'? Did you pick it from a dictionary of boring names?
+'example' for a variable? As creative as a blank wall!
+Function 'example' is a bit long, like a never-ending meeting.
+'example' is longer than a CVS receipt!
+'example' is an epic saga, not a function! Ever heard of refactoring?
+Nesting depth 3? Getting a bit deep, like a coding rabbit hole.
+3 levels of nesting? Are you building a code labyrinth?
+Nesting depth 3? Your code is more tangled than a ball of yarn!
+Complexity 10 in 'example'? A bit tricky, like a puzzle game.
+Complexity 10 in 'example'? More twisted than a soap opera plot.
+'example' with complexity 10? Did you write this in a coding fever dream?
+Maintainability index 10? Needs more clarity than a foggy morning.
+Score 10 for maintainability? Harder to maintain than a haunted house.
+10 maintainability? Even a gremlin would write clearer code!
+example issue? A small oops, like forgetting your lines in a play.
+example issue? Your code is screaming louder than a fire alarm.
+example issue? This code deserves a spot in the bug hall of fame!
