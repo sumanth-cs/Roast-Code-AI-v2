@@ -1,42 +1,155 @@
 {
     "no_docstring": {
-        "mild": ["No docstring for {name}? Documentation is for winners."],
-        "medium": ["No docstring for {name}? Guess we're playing 'guess the function' today."],
-        "brutal": ["No docstring for {name}? Did you think code is self-documenting like your ego?"]
+        "mild": [
+            "No docstring for {name}? Documentation is for winners, I guess.",
+            "Someone forgot to document {name}. Hope you remember what it does in 6 months!",
+            "No docstring for {name}? I'm sure it's perfectly self-explanatory... not."
+        ],
+        "medium": [
+            "No docstring for {name}? Guess we're playing 'guess the function' today.",
+            "Documentation is like flossing - everyone knows they should do it, but {name} proves you don't.",
+            "{name} with no docs? I bet your variable names are just as descriptive."
+        ],
+        "brutal": [
+            "No docstring for {name}? Did you think code is self-documenting like your ego?",
+            "Writing docs is hard, I get it. But leaving {name} undocumented is just lazy.",
+            "If {name} were any less documented, it would be classified information."
+        ]
     },
     "single_letter_var": {
-        "mild": ["Variable '{name}'? Could you be any more cryptic?"],
-        "medium": ["Single-letter '{name}'? Saving bytes or just being lazy?"],
-        "brutal": ["'{name}' as a variable? Did your keyboard run out of letters?"]
+        "mild": [
+            "Variable '{name}'? Could you be any more cryptic?",
+            "Ah, '{name}' - the variable name chosen by programmers who hate future readers.",
+            "Single-letter variables like '{name}' make code look like algebra homework."
+        ],
+        "medium": [
+            "Single-letter '{name}'? Saving bytes or just being lazy?",
+            "Naming a variable '{name}' is like naming your child 'Child' - technically correct but deeply unhelpful.",
+            "'{name}' as a variable? Did your creative juices dry up?"
+        ],
+        "brutal": [
+            "'{name}' as a variable? Did your keyboard run out of letters?",
+            "Single-letter variables are the programming equivalent of grunting instead of speaking.",
+            "I've seen more descriptive variable names in minified JavaScript. '{name}' is just sad."
+        ]
     },
     "generic_var": {
-        "mild": ["'{name}' as a variable? How original."],
-        "medium": ["Oh, '{name}'? Did you get that from the 'Bad Variable Names' handbook?"],
-        "brutal": ["'{name}' for a variable? I've seen more creativity in a blank text file."]
+        "mild": [
+            "'{name}' as a variable? How original.",
+            "Another '{name}' variable? You're really pushing the boundaries of creativity.",
+            "Ah, '{name}' - the go-to variable name when you can't be bothered to think."
+        ],
+        "medium": [
+            "Oh, '{name}'? Did you get that from the 'Bad Variable Names' handbook?",
+            "'{name}' is to variable names what 'thingy' is to object descriptions.",
+            "Naming things is hard, but '{name}' isn't even trying."
+        ],
+        "brutal": [
+            "'{name}' for a variable? I've seen more creativity in a blank text file.",
+            "If '{name}' were any more generic, it would just be called 'variable'.",
+            "Using '{name}' as a variable name is the programming equivalent of naming your dog 'Dog'."
+        ]
     },
     "long_function": {
-        "mild": ["Function '{name}' is a bit long. Consider breaking it up."],
-        "medium": ["'{name}' is longer than my patience with this code."],
-        "brutal": ["'{name}' is so long, it needs its own zip code."]
+        "mild": [
+            "Function '{name}' is a bit long. Consider breaking it up.",
+            "'{name}' is getting a little lengthy there. Maybe it's time for a split?",
+            "That '{name}' function is doing quite a lot. Might be time to delegate some responsibilities."
+        ],
+        "medium": [
+            "'{name}' is longer than my patience with this code.",
+            "Function '{name}' has more lines than my last grocery list. And that's saying something.",
+            "If '{name}' were any longer, it would need its own chapter index."
+        ],
+        "brutal": [
+            "'{name}' is so long, it needs its own zip code.",
+            "This '{name}' function is the programming equivalent of a run-on sentence.",
+            "I've seen shorter Russian novels than this '{name}' function."
+        ]
     },
     "excessive_nesting": {
-        "mild": ["Nesting depth {depth}? Getting a bit deep there."],
-        "medium": ["{depth} levels of nesting? Are you building code or a matryoshka doll?"],
-        "brutal": ["Nesting depth {depth}? Your code is more tangled than headphone wires!"]
+        "mild": [
+            "Nesting depth {depth}? Getting a bit deep there.",
+            "That's quite the nested structure you've got. Might want to flatten it out.",
+            "With {depth} levels of nesting, you're building a code pyramid."
+        ],
+        "medium": [
+            "{depth} levels of nesting? Are you building code or a matryoshka doll?",
+            "This nesting is so deep, I need a flashlight to find my way out.",
+            "At {depth} levels deep, your code is starting to resemble Inception."
+        ],
+        "brutal": [
+            "Nesting depth {depth}? Your code is more tangled than headphone wires!",
+            "With {depth} levels of nesting, you're one level away from creating a black hole.",
+            "This code has more layers than an onion, and it's making me cry just the same."
+        ]
     },
     "high_complexity": {
-        "mild": ["Complexity {score} in '{name}'? That's... ambitious."],
-        "medium": ["Complexity {score} in '{name}'? More twisted than a mystery novel."],
-        "brutal": ["'{name}' with complexity {score}? Did you write this during an earthquake?"]
+        "mild": [
+            "Complexity {score} in '{name}'? That's... ambitious.",
+            "Function '{name}' is getting a bit complex with a score of {score}.",
+            "Cyclomatic complexity of {score} in '{name}'? That's quite the mental workout."
+        ],
+        "medium": [
+            "Complexity {score} in '{name}'? More twisted than a mystery novel.",
+            "With a complexity of {score}, '{name}' is like a Rube Goldberg machine.",
+            "Function '{name}' has more paths than a choose-your-own-adventure book."
+        ],
+        "brutal": [
+            "'{name}' with complexity {score}? Did you write this during an earthquake?",
+            "Complexity {score}? This function is what happens when you give a monkey a keyboard.",
+            "At complexity {score}, this function isn't code - it's a cry for help."
+        ]
     },
     "low_maintainability": {
-        "mild": ["Maintainability index {score}? Could use some improvement."],
-        "medium": ["Score {score} for maintainability? This code will be legacy by tomorrow."],
-        "brutal": ["{score} maintainability? This code is a time bomb waiting to explode!"]
+        "mild": [
+            "Maintainability index {score}? Could use some improvement.",
+            "A maintainability score of {score} suggests this code might be tricky to work with.",
+            "With a maintainability index of {score}, future you might not be too happy."
+        ],
+        "medium": [
+            "Score {score} for maintainability? This code will be legacy by tomorrow.",
+            "Maintainability index of {score}? I've seen spaghetti code with better structure.",
+            "At {score} maintainability, this code is like a house of cards in a wind tunnel."
+        ],
+        "brutal": [
+            "{score} maintainability? This code is a time bomb waiting to explode!",
+            "With a maintainability score of {score}, this code isn't just bad - it's archeologically significant.",
+            "A maintainability index of {score} is what happens when you let autocorrect write your code."
+        ]
     },
     "pylint": {
-        "mild": ["{issue}? A small oversight."],
-        "medium": ["{issue}? Your code is trying to tell you something."],
-        "brutal": ["{issue}? This belongs in a coding horror museum!"]
+        "mild": [
+            "{issue}? A small oversight.",
+            "Found a little issue: {issue}. Easy fix!",
+            "Minor problem detected: {issue}. Nothing to worry about."
+        ],
+        "medium": [
+            "{issue}? Your code is trying to tell you something.",
+            "I found {issue}. It's not a bug, it's a feature... right?",
+            "Looks like we've got {issue}. Time for a quick fix!"
+        ],
+        "brutal": [
+            "{issue}? This belongs in a coding horror museum!",
+            "Seriously, {issue}? Did you even test this?",
+            "{issue} detected. I've seen better code from a room full of typing cats."
+        ]
+    },
+    "general": {
+        "mild": [
+            "I've seen better code from a first-year CS student.",
+            "This code works, but it's not exactly elegant.",
+            "There's room for improvement here, but it's not the worst I've seen."
+        ],
+        "medium": [
+            "This code is like a IKEA furniture assembly - it works, but you're not sure how.",
+            "I've seen more organized code in a kindergarten art project.",
+            "This isn't bad code... it's just creatively structured."
+        ],
+        "brutal": [
+            "This code is what happens when you let your cat walk on the keyboard.",
+            "If this code were a person, it would be wearing socks with sandals.",
+            "I've seen more logical reasoning from a Magic 8-Ball."
+        ]
     }
 }
