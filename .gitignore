@@ -2,3 +2,6 @@ venv/
 __pycache__/
 *.pyc
 fine_tuned_distilgpt2/
+.env
+*.env
+env/
