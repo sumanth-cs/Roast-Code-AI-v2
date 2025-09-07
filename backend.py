@@ -18,8 +18,18 @@ import re
 import subprocess
 import platform
 from functools import lru_cache
+import openai
+import os
+from typing import List
 
 app = Flask(__name__)
+
+# Initialize OpenAI client
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if OPENAI_API_KEY:
+    openai.api_key = OPENAI_API_KEY  # Add this line
+else:
+    print("OpenAI API key not found. Enhanced code correction will be disabled.")
 
 # Load fine-tuned DistilGPT-2 model for roasting
 model_path = "./fine_tuned_distilgpt2"
@@ -38,163 +48,165 @@ except Exception as e:
 # Load code generation model
 code_generator = pipeline('text-generation', model='distilgpt2', tokenizer='distilgpt2')
 
-# ElevenLabs API configuration
+# ElevenLabs API configuration - USE YOUR REAL API KEY HERE
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-ELEVENLABS_VOICE_ID = "pNInz6obpgDQGcFmaJgB"  # Default voice
+if not ELEVENLABS_API_KEY:
+    print("ElevenLabs API key not found. Voice features will be disabled.")
+ELEVENLABS_VOICE_ID = "pNInz6obpgDQGcFmaJgB"
 
 # Expanded roast templates with more variety and sarcasm
-ROAST_TEMPLATES = {
+ROAST_TEMPLATES= {
     "no_docstring": {
         "mild": [
-            "No docstring for {name}? Documentation is for winners, I guess.",
-            "Someone forgot to document {name}. Hope you remember what it does in 6 months!",
-            "No docstring for {name}? I'm sure it's perfectly self-explanatory... not."
+            "Bruh, no docstring? Did you forget what `{name}` does, or are you hoping nobody asks?",
+            "You call this documentation? My dog can write better comments.",
+            "I've seen more descriptive code comments on a blank page. What is `{name}` even doing?"
         ],
         "medium": [
-            "No docstring for {name}? Guess we're playing 'guess the function' today.",
-            "Documentation is like flossing - everyone knows they should do it, but {name} proves you don't.",
-            "{name} with no docs? I bet your variable names are just as descriptive."
+            "Look, I'm just an AI, but even I need an instruction manual. What is `{name}`?!",
+            "This isn't code. It's a mystery box, and I don't want to open it.",
+            "If `{name}` were any less documented, it would be a classified secret."
         ],
         "brutal": [
-            "No docstring for {name}? Did you think code is self-documenting like your ego?",
-            "Writing docs is hard, I get it. But leaving {name} undocumented is just lazy.",
-            "If {name} were any less documented, it would be classified information."
+            "Bruh, you're not a hero for skipping the docs on `{name}`. You're just lazy.",
+            "This isn't code. It's an elaborate prank on the next person who reads this.",
+            "I've seen more readable ancient hieroglyphs than this undocumented `{name}`."
         ]
     },
     "single_letter_var": {
         "mild": [
-            "Variable '{name}'? Could you be any more cryptic?",
-            "Ah, '{name}' - the variable name chosen by programmers who hate future readers.",
-            "Single-letter variables like '{name}' make code look like algebra homework."
+            "A single letter variable, `{name}`? How original. Did you run out of ideas?",
+            "'{name}'? Seriously? My cat walks across the keyboard and creates more meaningful variable names.",
+            "I've seen more descriptive text on a traffic sign."
         ],
         "medium": [
-            "Single-letter '{name}'? Saving bytes or just being lazy?",
-            "Naming a variable '{name}' is like naming your child 'Child' - technically correct but deeply unhelpful.",
-            "'{name}' as a variable? Did your creative juices dry up?"
+            "Bruh, '{name}'? You're not saving bytes, you're just making me sad.",
+            "This isn't a variable, it's a placeholder for an actual thought.",
+            "I'm guessing '{name}' stands for 'I have no idea what to call this'."
         ],
         "brutal": [
-            "'{name}' as a variable? Did your keyboard run out of letters?",
-            "Single-letter variables are the programming equivalent of grunting instead of speaking.",
-            "I've seen more descriptive variable names in minified JavaScript. '{name}' is just sad."
+            "'{name}'? What a trash variable name. Did your keyboard run out of letters?",
+            "I bet your creative juices dried up. Now you're using single letters like a caveman.",
+            "I'd rather stare at a blank screen than try to figure out what `{name}` is."
         ]
     },
     "generic_var": {
         "mild": [
-            "'{name}' as a variable? How original.",
-            "Another '{name}' variable? You're really pushing the boundaries of creativity.",
-            "Ah, '{name}' - the go-to variable name when you can't be bothered to think."
+            "Oh, '{name}'? Did you get that from the 'Bad Variable Names' handbook?",
+            "'{name}' is to variables what 'thingy' is to object descriptions.",
+            "You're not being lazy with `{name}`. You're just being a genius... at not trying."
         ],
         "medium": [
-            "Oh, '{name}'? Did you get that from the 'Bad Variable Names' handbook?",
-            "'{name}' is to variable names what 'thingy' is to object descriptions.",
-            "Naming things is hard, but '{name}' isn't even trying."
+            "I've seen more creative variable names on a license plate.",
+            "Bruh, `{name}`? I’ve seen more creative code from a room full of typing cats.",
+            "If `{name}` were any more generic, it would just be called 'variable'."
         ],
         "brutal": [
-            "'{name}' for a variable? I've seen more creativity in a blank text file.",
-            "If '{name}' were any more generic, it would just be called 'variable'.",
-            "Using '{name}' as a variable name is the programming equivalent of naming your dog 'Dog'."
+            "This variable `{name}` is a choice. A poor, poor choice.",
+            "Using `{name}` is a clear sign you've given up on life.",
+            "I've seen more creativity in a blank text file."
         ]
     },
     "long_function": {
         "mild": [
-            "Function '{name}' is a bit long. Consider breaking it up.",
-            "'{name}' is getting a little lengthy there. Maybe it's time for a split?",
-            "That '{name}' function is doing quite a lot. Might be time to delegate some responsibilities."
+            "Bruh, `{name}` is longer than my patience with this code. Break it up, maybe?",
+            "I feel like I need an intermission to get through `{name}`. It's not a novel, it's code.",
+            "That function `{name}` is doing quite a lot. Are you sure it's not trying to solve world peace?"
         ],
         "medium": [
-            "'{name}' is longer than my patience with this code.",
-            "Function '{name}' has more lines than my last grocery list. And that's saying something.",
-            "If '{name}' were any longer, it would need its own chapter index."
+            "I've seen shorter Russian novels than this function. I hope `{name}` is worth it.",
+            "Is `{name}` a function or a cry for help?",
+            "This isn't a function. It's a run-on sentence."
         ],
         "brutal": [
-            "'{name}' is so long, it needs its own zip code.",
-            "This '{name}' function is the programming equivalent of a run-on sentence.",
-            "I've seen shorter Russian novels than this '{name}' function."
+            "This function is so long, it needs its own zip code.",
+            "I'm afraid to touch this function. It looks like a house of cards in a wind tunnel.",
+            "Did you write this during an earthquake?"
         ]
     },
     "excessive_nesting": {
         "mild": [
-            "Nesting depth {depth}? Getting a bit deep there.",
-            "That's quite the nested structure you've got. Might want to flatten it out.",
-            "With {depth} levels of nesting, you're building a code pyramid."
+            "Nesting depth `{depth}`? Are you building code or a Matryoshka doll?",
+            "Bruh, this nesting is so deep, I need a flashlight to find my way out.",
+            "This code has more layers than an onion, and it's making me cry just the same."
         ],
         "medium": [
-            "{depth} levels of nesting? Are you building code or a matryoshka doll?",
-            "This nesting is so deep, I need a flashlight to find my way out.",
-            "At {depth} levels deep, your code is starting to resemble Inception."
+            "With `{depth}` levels of nesting, your code is starting to resemble Inception.",
+            "Your code looks like a staircase designed by a sadist.",
+            "This nesting is so tangled, it's like headphone wires in a black hole."
         ],
         "brutal": [
-            "Nesting depth {depth}? Your code is more tangled than headphone wires!",
-            "With {depth} levels of nesting, you're one level away from creating a black hole.",
-            "This code has more layers than an onion, and it's making me cry just the same."
+            "I've seen more straightforward tax code than this.",
+            "I'm pretty sure you're one level away from creating a black hole with this code.",
+            "This nesting is a disaster."
         ]
     },
     "high_complexity": {
         "mild": [
-            "Complexity {score} in '{name}'? That's... ambitious.",
-            "Function '{name}' is getting a bit complex with a score of {score}.",
-            "Cyclomatic complexity of {score} in '{name}'? That's quite the mental workout."
+            "Complexity `{score}` in `{name}`? That's... ambitious. Or just lazy.",
+            "With a complexity of `{score}`, `{name}` is more twisted than a mystery novel.",
+            "This function has more paths than a choose-your-own-adventure book. Good luck."
         ],
         "medium": [
-            "Complexity {score} in '{name}'? More twisted than a mystery novel.",
-            "With a complexity of {score}, '{name}' is like a Rube Goldberg machine.",
-            "Function '{name}' has more paths than a choose-your-own-adventure book."
+            "Complexity `{score}`? This function is what happens when you give a monkey a keyboard.",
+            "This isn't code, it’s modern art. Unreadable, but full of emotion.",
+            "At complexity `{score}`, this function isn't code, it's a Rube Goldberg machine."
         ],
         "brutal": [
-            "'{name}' with complexity {score}? Did you write this during an earthquake?",
-            "Complexity {score}? This function is what happens when you give a monkey a keyboard.",
-            "At complexity {score}, this function isn't code - it's a cry for help."
+            "Complexity `{score}`? I've seen simpler nuclear launch codes.",
+            "My dog can code better than this. What a trash code.",
+            "This isn't a function, it's a cry for help."
         ]
     },
     "low_maintainability": {
         "mild": [
-            "Maintainability index {score}? Could use some improvement.",
-            "A maintainability score of {score} suggests this code might be tricky to work with.",
-            "With a maintainability index of {score}, future you might not be too happy."
+            "Maintainability index `{score}`? This code will be legacy by tomorrow.",
+            "This code is like a house of cards in a wind tunnel. Don't touch it.",
+            "With a maintainability index of `{score}`, future you will hate past you."
         ],
         "medium": [
-            "Score {score} for maintainability? This code will be legacy by tomorrow.",
-            "Maintainability index of {score}? I've seen spaghetti code with better structure.",
-            "At {score} maintainability, this code is like a house of cards in a wind tunnel."
+            "I've seen spaghetti code with better structure.",
+            "Your maintainability score is `{score}`. I'm afraid to touch this.",
+            "This code isn't just bad; it's archeologically significant."
         ],
         "brutal": [
-            "{score} maintainability? This code is a time bomb waiting to explode!",
-            "With a maintainability score of {score}, this code isn't just bad - it's archeologically significant.",
-            "A maintainability index of {score} is what happens when you let autocorrect write your code."
+            "Maintainability `{score}`. This code isn't a bug; it's a lifestyle.",
+            "I'd rather debug my own brain than this code.",
+            "A maintainability score of `{score}` is what happens when you let autocorrect write your code."
         ]
     },
     "pylint": {
         "mild": [
-            "{issue}? A small oversight.",
-            "Found a little issue: {issue}. Easy fix!",
-            "Minor problem detected: {issue}. Nothing to worry about."
+            "Found a little issue: `{issue}`. Easy fix!",
+            "Looks like we've got `{issue}`. Time for a quick fix!",
+            "I found `{issue}`. It's not a bug, it's a feature... right?"
         ],
         "medium": [
-            "{issue}? Your code is trying to tell you something.",
-            "I found {issue}. It's not a bug, it's a feature... right?",
-            "Looks like we've got {issue}. Time for a quick fix!"
+            "Your code is trying to tell you something: `{issue}`.",
+            "I've seen better code from a room full of typing cats. `{issue}`.",
+            "Seriously, `{issue}`? Did you even test this?"
         ],
         "brutal": [
-            "{issue}? This belongs in a coding horror museum!",
-            "Seriously, {issue}? Did you even test this?",
-            "{issue} detected. I've seen better code from a room full of typing cats."
+            "`{issue}` detected. This belongs in a coding horror museum!",
+            "Are you a programmer or a professional procrastinator?",
+            "What did you do to your code to get `{issue}`?"
         ]
     },
     "general": {
         "mild": [
-            "I've seen better code from a first-year CS student.",
             "This code works, but it's not exactly elegant.",
-            "There's room for improvement here, but it's not the worst I've seen."
+            "I've seen better code from a first-year CS student.",
+            "This isn't bad code... it's just creatively structured."
         ],
         "medium": [
             "This code is like a IKEA furniture assembly - it works, but you're not sure how.",
             "I've seen more organized code in a kindergarten art project.",
-            "This isn't bad code... it's just creatively structured."
+            "I've seen more logical reasoning from a Magic 8-Ball."
         ],
         "brutal": [
             "This code is what happens when you let your cat walk on the keyboard.",
             "If this code were a person, it would be wearing socks with sandals.",
-            "I've seen more logical reasoning from a Magic 8-Ball."
+            "I've seen more logic in a bad romance novel."
         ]
     }
 }
@@ -203,27 +215,27 @@ ROAST_TEMPLATES = {
 CODE_EXAMPLES = {
     "add two numbers": {
         "code": "def add_numbers(a, b):\n    \"\"\"Add two numbers together.\"\"\"\n    return a + b\n\n# Example usage\nresult = add_numbers(5, 3)\nprint(f\"The sum is: {result}\")",
-        "roast": "You need help adding two numbers? Maybe you should stick to counting on your fingers."
+        "roast": "A function for adding two numbers, bruh? Did your calculator break or what?"
     },
     "calculator": {
         "code": "def calculator(a, b, operation):\n    \"\"\"Perform basic arithmetic operations.\"\"\"\n    if operation == 'add':\n        return a + b\n    elif operation == 'subtract':\n        return a - b\n    elif operation == 'multiply':\n        return a * b\n    elif operation == 'divide':\n        if b != 0:\n            return a / b\n        else:\n            raise ValueError(\"Cannot divide by zero\")\n    else:\n        raise ValueError(\"Unsupported operation\")\n\n# Example usage\nresult = calculator(10, 5, 'add')\nprint(f\"Result: {result}\")",
-        "roast": "A calculator? Really? Did you forget how to use the one on your phone?"
+        "roast": "What a trash calculator. I've seen more innovation on a Speak & Spell."
     },
     "hello world": {
         "code": "print(\"Hello, World!\")",
-        "roast": "You need help with 'Hello World'? Maybe consider a different career."
+        "roast": "You call that code? My dog can code a better 'Hello World' in its sleep."
     },
     "fibonacci": {
         "code": "def fibonacci(n):\n    \"\"\"Generate a Fibonacci sequence up to n elements.\"\"\"\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    elif n == 2:\n        return [0, 1]\n    \n    sequence = [0, 1]\n    for i in range(2, n):\n        sequence.append(sequence[i-1] + sequence[i-2])\n    return sequence\n\n# Example usage\nprint(fibonacci(10))",
-        "roast": "Fibonacci sequence? At least you're trying something moderately interesting."
+        "roast": "Fibonacci? Seriously, bruh? Is this your final project for CS101?"
     },
     "file reader": {
         "code": "def read_file(filename):\n    \"\"\"Read and return the contents of a file.\"\"\"\n    try:\n        with open(filename, 'r') as file:\n            return file.read()\n    except FileNotFoundError:\n        print(f\"File {filename} not found\")\n        return None\n    except IOError:\n        print(f\"Error reading file {filename}\")\n        return None\n\n# Example usage\ncontent = read_file(\"example.txt\")\nif content:\n    print(content)",
-        "roast": "Reading files is pretty basic stuff. Did you skip Programming 101?"
+        "roast": "I've seen more creative file readers from a toddler's toy. What a trash."
     },
     "sort list": {
         "code": "def sort_list(lst, reverse=False):\n    \"\"\"Sort a list in ascending or descending order.\"\"\"\n    return sorted(lst, reverse=reverse)\n\n# Example usage\nnumbers = [3, 1, 4, 1, 5, 9, 2, 6, 5]\nsorted_numbers = sort_list(numbers)\nprint(f\"Sorted numbers: {sorted_numbers}\")",
-        "roast": "Sorting a list? Couldn't figure out the built-in sorted() function on your own?"
+        "roast": "You wrote a whole function for `sorted()`? Bruh, just use the built-in function."
     }
 }
 
@@ -431,6 +443,64 @@ def generate_roast(issues, roast_level="medium"):
     
     return roasts
 
+def enhanced_correct_code(code: str, issues: List[str]) -> str:
+    """
+    Use OpenAI to intelligently correct code based on identified issues.
+    """
+    if not OPENAI_API_KEY:  # Change this line
+        # Fallback to basic correction if no OpenAI client
+        try:
+            return autopep8.fix_code(code, options={'aggressive': 2})
+        except:
+            return code
+    
+    # Create a prompt that explains the issues and asks for correction
+    issues_text = "\n".join([f"- {issue}" for issue in issues])
+    
+    prompt = f"""
+    Please correct the following Python code to fix these issues:
+    {issues_text}
+    
+    Additionally, ensure the code follows PEP 8 guidelines, has proper docstrings, 
+    and uses meaningful variable names.
+    
+    Return only the corrected code without any explanations.
+    
+    Code to correct:
+    ```python
+    {code}
+    ```
+    """
+    
+    try:
+        # Use the OLD OpenAI API format
+        response = openai.ChatCompletion.create(  # Change this line
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful Python code assistant that improves code quality."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=2000,
+            temperature=0.2
+        )
+        
+        corrected_code = response.choices[0].message.content.strip()  # This line stays the same
+        
+        # Extract code from markdown code blocks if present
+        if "```python" in corrected_code:
+            corrected_code = corrected_code.split("```python")[1].split("```")[0].strip()
+        elif "```" in corrected_code:
+            corrected_code = corrected_code.split("```")[1].split("```")[0].strip()
+            
+        return corrected_code
+        
+    except Exception as e:
+        print(f"OpenAI correction failed: {e}")
+        # Fallback to autopep8
+        try:
+            return autopep8.fix_code(code, options={'aggressive': 2})
+        except:
+            return code
 
 def generate_code_from_prompt(prompt):
     """Generate code based on user prompt with sarcastic response."""
@@ -471,7 +541,7 @@ def generate_code_from_prompt(prompt):
 def text_to_speech(text, roast_level="medium"):
     """Convert text to speech using ElevenLabs or fallback to system TTS."""
     # First try ElevenLabs if API key is available
-    if ELEVENLABS_API_KEY and ELEVENLABS_API_KEY != "sk_d5f7149c8cec460c474eb8689acd089ca0d029b7a85951fb":
+    if ELEVENLABS_API_KEY:
         headers = {
             "Accept": "audio/mpeg",
             "Content-Type": "application/json",
@@ -497,7 +567,6 @@ def text_to_speech(text, roast_level="medium"):
         
         # Add more expressive text with pauses and emphasis
         expressive_text = add_expression_to_text(text, roast_level)
-        
         data = {
             "text": expressive_text,
             "model_id": "eleven_multilingual_v2",
@@ -510,21 +579,44 @@ def text_to_speech(text, roast_level="medium"):
         }
         
         try:
+            print(f"Attempting ElevenLabs API call with voice_id: {voice_id}")
             response = requests.post(
                 f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
                 json=data,
                 headers=headers,
                 timeout=15
             )
-            response.raise_for_status()
-            return BytesIO(response.content)
+            
+            # Check if the response is successful
+            if response.status_code == 200:
+                print("ElevenLabs API call successful!")
+                return BytesIO(response.content)
+            else:
+                print(f"ElevenLabs API failed with status code: {response.status_code}")
+                print(f"Response text: {response.text}")
+                
+                # Check for specific error conditions
+                if response.status_code == 401:
+                    print("ERROR: Invalid API key. Please check your ElevenLabs API key.")
+                elif response.status_code == 402:
+                    print("ERROR: Quota exceeded. Check your ElevenLabs subscription.")
+                elif response.status_code == 422:
+                    print("ERROR: Invalid request parameters. Check your voice_id and data format.")
+                elif response.status_code == 429:
+                    print("ERROR: Rate limit exceeded. Try again later.")
+                    
+        except requests.exceptions.Timeout:
+            print("ERROR: ElevenLabs API request timed out.")
+        except requests.exceptions.ConnectionError:
+            print("ERROR: Failed to connect to ElevenLabs API. Check your internet connection.")
         except Exception as e:
-            print(f"ElevenLabs failed: {e}. Falling back to system TTS.")
+            print(f"ERROR: ElevenLabs API call failed: {e}")
     
     # Fallback to system TTS based on platform
+    print("Falling back to system TTS...")
     try:
         if platform.system() == "Darwin":  # macOS
-            return generate_audio_with_say_simple(text, roast_level)
+            return generate_audio_with_say(text, roast_level)
         elif platform.system() == "Windows":  # Windows
             return generate_audio_with_windows_tts(text)
         else:  # Linux
@@ -578,35 +670,63 @@ def generate_audio_with_say_simple(text, roast_level):
     
 def add_expression_to_text(text, roast_level):
     """Add pauses and emphasis to make the speech more expressive."""
-    # Add pauses for dramatic effect
-    phrases = text.split('. ')
+    # Map roast level to expressive parameters
+    expression_config = {
+        "mild": {
+            "intro": "Alright, let's take a look at this...",
+            "pause_time": "300ms",
+            "rate": "fast",
+            "pitch": "high",
+            "emphasis": "moderate"
+        },
+        "medium": {
+            "intro": "Okay, let's see what we have here...",
+            "pause_time": "500ms", 
+            "rate": "medium",
+            "pitch": "medium",
+            "emphasis": "strong"
+        },
+        "brutal": {
+            "intro": "Oh my god... what is this mess...",
+            "pause_time": "700ms",
+            "rate": "slow",
+            "pitch": "low",
+            "emphasis": "strong"
+        }
+    }
+    
+    config = expression_config.get(roast_level, expression_config["medium"])
+    
+    # Add dramatic pauses and emphasis to key words
+    emphasis_words = {
+        "mild": ["maybe", "consider", "suggestion", "improve"],
+        "medium": ["problem", "issue", "error", "fix", "should"],
+        "brutal": ["terrible", "awful", "horrible", "disaster", "trash", "lazy", "bad", "wrong"]
+    }
+    
+    words = text.split()
     expressive_text = ""
     
-    for i, phrase in enumerate(phrases):
-        if phrase.strip():
-            # Add emphasis based on roast level
-            if roast_level == "brutal" and any(keyword in phrase.lower() for keyword in ["disaster", "horrible", "terrible", "awful"]):
-                expressive_text += f"<emphasis level=\"strong\">{phrase}</emphasis>"
-            elif roast_level == "medium" and any(keyword in phrase.lower() for keyword in ["really", "seriously", "actually"]):
-                expressive_text += f"<emphasis level=\"moderate\">{phrase}</emphasis>"
+    for i, word in enumerate(words):
+        # Add emphasis to key words based on roast level
+        if any(keyword in word.lower() for keyword in emphasis_words[roast_level]):
+            expressive_text += f'<emphasis level="{config["emphasis"]}">{word}</emphasis>'
+        else:
+            expressive_text += word
+            
+        # Add pauses for dramatic effect
+        if i < len(words) - 1:
+            if roast_level == "brutal" and random.random() < 0.1:
+                expressive_text += f'...<break time="{config["pause_time"]}"/> '
+            elif roast_level == "medium" and random.random() < 0.05:
+                expressive_text += f'<break time="{config["pause_time"]}"/> '
             else:
-                expressive_text += phrase
-                
-            # Add pauses between phrases
-            if i < len(phrases) - 1:
-                expressive_text += f"...<break time=\"500ms\"/> "
-            else:
-                expressive_text += ".<break time=\"300ms\"/>"
+                expressive_text += " "
     
-    # Add intro based on roast level
-    if roast_level == "brutal":
-        expressive_text = f"<prosody rate=\"slow\" pitch=\"low\">Oh my god...</prosody><break time=\"700ms\"/> {expressive_text}"
-    elif roast_level == "medium":
-        expressive_text = f"<prosody rate=\"medium\" pitch=\"medium\">Okay, let's see...</prosody><break time=\"500ms\"/> {expressive_text}"
-    else:
-        expressive_text = f"<prosody rate=\"fast\" pitch=\"high\">Alright then...</prosody><break time=\"300ms\"/> {expressive_text}"
+    # Add expressive intro based on roast level
+    expressive_intro = f'<prosody rate="{config["rate"]}" pitch="{config["pitch"]}">{config["intro"]}</prosody><break time="{config["pause_time"]}"/>'
     
-    return expressive_text
+    return expressive_intro + expressive_text
 
 
 def generate_audio_with_say(text, roast_level):
@@ -615,30 +735,26 @@ def generate_audio_with_say(text, roast_level):
         # Create a temporary file
         with tempfile.NamedTemporaryFile(suffix='.aiff', delete=False) as temp_file:
             temp_path = temp_file.name
+            
+        # More expressive voice mapping
+        voice_mapping = {
+            "mild": ["Samantha", "150", "50"],  # [voice, rate, pitch]
+            "medium": ["Fred", "140", "40"],     # More sarcastic tone
+            "brutal": ["Victoria", "130", "30"]  # More dramatic tone
+        }
         
-        # Adjust voice and rate based on roast level for more expression
-        if roast_level == "mild":
-            voice = "Samantha"
-            rate = 170
-            pitch = 50
-        elif roast_level == "medium":
-            voice = "Fred"  # More sarcastic tone
-            rate = 160
-            pitch = 40
-        else:  # brutal
-            voice = "Victoria"  # More dramatic tone
-            rate = 150
-            pitch = 30
+        voice, rate, pitch = voice_mapping.get(roast_level, ["Fred", "140", "40"])
         
         # Use macOS 'say' command to generate audio with more expression
         cmd = [
             'say', 
             '-v', voice,
-            '-r', str(rate),
-            '-p', str(pitch),
+            '-r', rate,
+            '-p', pitch,
             '-o', temp_path,
             text
         ]
+        
         subprocess.run(cmd, check=True, timeout=30, capture_output=True)
         
         # Convert AIFF to MP3 using afconvert
@@ -649,32 +765,57 @@ def generate_audio_with_say(text, roast_level):
         # Read the MP3 file
         with open(mp3_path, 'rb') as f:
             audio_data = f.read()
-        
+            
         # Clean up
         os.unlink(temp_path)
         os.unlink(mp3_path)
         
         return BytesIO(audio_data)
+        
     except Exception as e:
         print(f"macOS 'say' command failed: {e}")
         return None
 
 def generate_audio_with_windows_tts(text):
-    """Generate audio using Windows TTS."""
+    """Generate audio using Windows TTS with better quality."""
     try:
-        # For Windows, we'll use a simple approach with gTTS as fallback
-        from gtts import gTTS
+        # Use pyttsx3 for better Windows TTS
+        import pyttsx3
         
-        # Create in-memory file
-        mp3_fp = BytesIO()
-        tts = gTTS(text=text, lang='en')
-        tts.write_to_fp(mp3_fp)
-        mp3_fp.seek(0)
+        engine = pyttsx3.init()
         
-        return mp3_fp
+        # Set properties for better sound
+        engine.setProperty('rate', 180)  # Speed percent
+        engine.setProperty('volume', 0.9)  # Volume 0-1
+        
+        # Save to temporary file
+        with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as temp_file:
+            temp_path = temp_file.name
+            
+        engine.save_to_file(text, temp_path)
+        engine.runAndWait()
+        
+        # Read the file
+        with open(temp_path, 'rb') as f:
+            audio_data = f.read()
+            
+        # Clean up
+        os.unlink(temp_path)
+        return BytesIO(audio_data)
+        
     except Exception as e:
-        print(f"Windows TTS failed: {e}")
-        return None
+        print(f"Windows pyttsx3 failed: {e}")
+        # Fallback to gTTS
+        try:
+            from gtts import gTTS
+            mp3_fp = BytesIO()
+            tts = gTTS(text=text, lang='en', slow=False)
+            tts.write_to_fp(mp3_fp)
+            mp3_fp.seek(0)
+            return mp3_fp
+        except Exception as e:
+            print(f"Windows gTTS also failed: {e}")
+            return None
 
 def generate_audio_with_linux_tts(text):
     """Generate audio using Linux TTS (espeak)."""
@@ -712,7 +853,7 @@ def roast_code():
     
     if not code:
         return jsonify({"error": "No code provided"}), 400
-    
+        
     try:
         issues, metrics = analyze_code(code, language)
         
@@ -724,19 +865,20 @@ def roast_code():
             roast_text = " ".join(roasts)
             audio_data = text_to_speech(roast_text, roast_level)
         
-        corrected_code = correct_code(code) if language == "python" else code
+        # Use the enhanced correction function
+        corrected_code = enhanced_correct_code(code, issues) if language == "python" else code
         
         audio_b64 = None
         if audio_data:
             audio_b64 = base64.b64encode(audio_data.getvalue()).decode('utf-8')
-        
+            
         return jsonify({
             "roasts": roasts,
             "corrected_code": corrected_code,
             "metrics": metrics,
             "audio": audio_b64
         })
-    
+        
     except Exception as e:
         print(f"Error in roast_code: {e}")
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
@@ -767,9 +909,59 @@ def generate_code_endpoint():
         print(f"Error in generate_code_endpoint: {e}")
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
+@app.route('/api/debug/elevenlabs', methods=['GET'])
+def debug_elevenlabs():
+    """Debug endpoint to check ElevenLabs API status"""
+    if not ELEVENLABS_API_KEY:
+        return jsonify({
+            "status": "error",
+            "message": "ElevenLabs API key not configured"
+        }), 400
+    
+    try:
+        # Test the voices endpoint to check API key validity
+        headers = {
+            "Accept": "application/json",
+            "xi-api-key": ELEVENLABS_API_KEY
+        }
+        
+        response = requests.get(
+            "https://api.elevenlabs.io/v1/voices",
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            voices = response.json()
+            return jsonify({
+                "status": "success",
+                "message": "ElevenLabs API is working correctly",
+                "voices_count": len(voices.get('voices', [])),
+                "api_key_prefix": ELEVENLABS_API_KEY[:10] + "..." if ELEVENLABS_API_KEY else "None"
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": f"ElevenLabs API returned status code: {response.status_code}",
+                "response_text": response.text[:200] + "..." if len(response.text) > 200 else response.text,
+                "api_key_prefix": ELEVENLABS_API_KEY[:10] + "..." if ELEVENLABS_API_KEY else "None"
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Exception when calling ElevenLabs API: {str(e)}",
+            "api_key_prefix": ELEVENLABS_API_KEY[:10] + "..." if ELEVENLABS_API_KEY else "None"
+        }), 500
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    return jsonify({"status": "healthy", "model_loaded": True})
+    return jsonify({
+        "status": "healthy", 
+        "model_loaded": True,
+        "openai_available": bool(OPENAI_API_KEY),  
+        "elevenlabs_available": bool(ELEVENLABS_API_KEY)
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

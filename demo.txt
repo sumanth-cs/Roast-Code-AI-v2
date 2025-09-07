@@ -1,0 +1,240 @@
+Of course! Here's a comprehensive set of example code snippets and prompts to demonstrate your Roast Code AI project effectively. These examples are designed to showcase all the different features and roast types.
+
+## 🎯 Demo Strategy Guide
+
+**Start with:** A simple example to show basic functionality
+**Then show:** Different roast intensities (mild → medium → brutal)
+**Finally:** Demonstrate code generation capabilities
+
+---
+
+## 1. Code Examples for Analysis (Paste these in the "Code Analysis" tab)
+
+### Example 1: Basic Issues (Good Starter Example)
+```python
+def calc(a, b):
+    x = a + b
+    y = x * 2
+    return y
+
+result = calc(5, 3)
+print(result)
+```
+**What it demonstrates:** No docstring, single-letter variables, generic function name
+
+### Example 2: No Documentation
+```python
+def process_data(input):
+    temp = []
+    for item in input:
+        if item > 5:
+            temp.append(item * 2)
+    return temp
+
+data = [1, 6, 3, 8, 2]
+output = process_data(data)
+print(output)
+```
+**What it demonstrates:** No docstring, generic variable names (`temp`, `input`)
+
+### Example 3: Overly Complex Function
+```python
+def handle_user_data(user_input, config, db_connection, validate=True):
+    if validate:
+        if not user_input:
+            return None
+        if not isinstance(user_input, dict):
+            raise ValueError("Input must be dictionary")
+        if 'name' not in user_input:
+            raise ValueError("Name field required")
+        if 'email' not in user_input:
+            raise ValueError("Email field required")
+    
+    processed_data = {}
+    for key, value in user_input.items():
+        if key == 'email':
+            processed_data[key] = value.lower().strip()
+        elif key == 'name':
+            processed_data[key] = value.title().strip()
+        else:
+            processed_data[key] = str(value).strip()
+    
+    if db_connection:
+        try:
+            cursor = db_connection.cursor()
+            query = "INSERT INTO users VALUES (%s, %s, %s)"
+            cursor.execute(query, (processed_data['name'], processed_data['email'], str(processed_data)))
+            db_connection.commit()
+        except Exception as e:
+            print(f"Database error: {e}")
+            return None
+    
+    return processed_data
+```
+**What it demonstrates:** Long function, high complexity, mixed responsibilities
+
+### Example 4: Deep Nesting
+```python
+def analyze_scores(scores, threshold=50):
+    results = {}
+    for student in scores:
+        if student in results:
+            continue
+        total = 0
+        count = 0
+        for subject, score in scores[student].items():
+            if score is not None:
+                if score >= 0:
+                    total += score
+                    count += 1
+                    if score < threshold:
+                        if subject not in results:
+                            results[subject] = []
+                        results[subject].append(student)
+        if count > 0:
+            results[student] = total / count
+    return results
+```
+**What it demonstrates:** Excessive nesting, complex logic
+
+### Example 5: Really Bad Code (For "Brutal" Roast)
+```python
+def f(d):
+    r = []
+    for i in d:
+        if i % 2 == 0:
+            for j in range(i):
+                if j % 3 == 0:
+                    if j > 5:
+                        try:
+                            x = j / (i - j)
+                            r.append(x)
+                        except:
+                            pass
+    return r
+
+data = [10, 15, 20, 25]
+result = f(data)
+print(result)
+```
+**What it demonstrates:** Single-letter names, deep nesting, no error handling, no docstring
+
+### Example 6: Syntax Errors (Showcases Correction)
+```python
+def calculate_average numbers):
+    total = 0
+    count = 0
+    for num in numbers
+        total += num
+        count += 1
+    
+    if count == 0:
+        return 0
+    else
+        return total / count
+
+data = [85, 90, 78, 92]
+avg = calculate_average(data)
+print("Average:", avg)
+```
+**What it demonstrates:** Syntax errors, missing colons, missing parentheses
+
+---
+
+## 2. Code Generation Prompts (Use in the "Code Generation" tab)
+
+### Beginner Prompts:
+1. **"Write a function to calculate factorial of a number"**
+2. **"Create a Python function to reverse a string"**
+3. **"Generate code to read a CSV file and print its contents"**
+4. **"Write a function that checks if a number is prime"**
+
+### Intermediate Prompts:
+5. **"Create a password strength checker function"**
+6. **"Generate code to fetch data from a REST API"**
+7. **"Write a function to validate an email address"**
+8. **"Create a decorator to measure function execution time"**
+
+### Advanced Prompts:
+9. **"Implement a simple LRU cache decorator"**
+10. **"Write a context manager for database connections"**
+11. **"Generate code for a simple Flask REST endpoint"**
+12. **"Create a generator function to read large files in chunks"**
+
+### Real-world Scenarios:
+13. **"Write code to send an email with attachments"**
+14. **"Create a function to resize images while maintaining aspect ratio"**
+15. **"Generate code to parse and analyze log files"**
+16. **"Write a function to handle file uploads with validation"**
+
+---
+
+## 3. Demo Script for Your Presentation
+
+### Introduction (2 minutes)
+"Hey everyone! Today I'm showing you **Roast Code AI** - a tool that gives your code sarcastic feedback to make learning more memorable and fun!"
+
+### Demo 1: Basic Analysis (3 minutes)
+1. Paste **Example 1** into the code analyzer
+2. Set intensity to "Medium"
+3. Show the roasts about single-letter variables
+4. Play the audio roast
+5. Show the corrected code
+
+**Say:** "See how it catches basic issues and suggests improvements with a humorous twist!"
+
+### Demo 2: Different Intensity Levels (3 minutes)
+1. Use **Example 5** (really bad code)
+2. First run with "Mild" intensity
+3. Then run with "Brutal" intensity
+4. Compare the different roasts
+
+**Say:** "You can adjust how harsh the feedback is - from gentle suggestions to brutal honesty!"
+
+### Demo 3: Code Correction (3 minutes)
+1. Use **Example 6** (syntax errors)
+2. Show how it fixes syntax issues
+3. Demonstrate the improved, working code
+
+**Say:** "It doesn't just criticize - it actually fixes your code and makes it PEP8 compliant!"
+
+### Demo 4: Code Generation (3 minutes)
+1. Use prompt: **"Write a function to calculate factorial of a number"**
+2. Show the generated code with proper docstring
+3. Use another prompt: **"Create a password strength checker function"**
+
+**Say:** "You can also generate new code from simple descriptions, and yes - it roasts you for needing help with basic stuff!"
+
+### Demo 5: Voice Features (2 minutes)
+1. Use any example and play the audio roast
+2. Show how different intensities change the voice tone
+
+**Say:** "The audio roasts add another layer of engagement - the AI actually sounds sarcastic!"
+
+### Technical Overview (2 minutes)
+**Mention these key features:**
+- AST parsing for code structure analysis
+- Pylint for code quality checks  
+- Radon for complexity metrics
+- Fine-tuned DistilGPT-2 for sarcastic responses
+- ElevenLabs for expressive voice generation
+
+### Conclusion (1 minute)
+"Roast Code AI makes code reviews fun and educational! It's perfect for students learning Python, teams doing code reviews, or anyone who wants to improve their coding skills with a laugh."
+
+---
+
+## 4. Quick Demo Cheat Sheet
+
+| Step | What to Do | What to Say |
+|------|------------|-------------|
+| 1 | Show clean interface | "This is where the magic happens" |
+| 2 | Paste Example 1 → Analyze | "Let's see what it thinks of basic code" |
+| 3 | Play audio roast | "The AI doesn't hold back!" |
+| 4 | Show corrected code | "It actually improves your code" |
+| 5 | Switch to Brutal mode | "Now let's turn up the sarcasm" |
+| 6 | Generate code from prompt | "You can also create code from descriptions" |
+| 7 | Show architecture diagram | "Here's how it all works together" |
+
+---
+
