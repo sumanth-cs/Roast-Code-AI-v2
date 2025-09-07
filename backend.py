@@ -22,12 +22,25 @@ import openai
 import os
 from typing import List
 
+from dotenv import load_dotenv  
+
+# Load environment variables from .env file
+load_dotenv()  
+
+import openai 
+
 app = Flask(__name__)
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    print("Gemini API key loaded successfully")
+else:
+    print("Gemini API key not found. Enhanced code correction will be disabled.")
 
 # Initialize OpenAI client
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if OPENAI_API_KEY:
-    openai.api_key = OPENAI_API_KEY  # Add this line
+    openai.api_key = OPENAI_API_KEY  
 else:
     print("OpenAI API key not found. Enhanced code correction will be disabled.")
 
@@ -445,10 +458,10 @@ def generate_roast(issues, roast_level="medium"):
 
 def enhanced_correct_code(code: str, issues: List[str]) -> str:
     """
-    Use OpenAI to intelligently correct code based on identified issues.
+    Use Gemini AI to correct code based on identified issues
     """
-    if not OPENAI_API_KEY:  # Change this line
-        # Fallback to basic correction if no OpenAI client
+    if not GEMINI_API_KEY:
+        # Fallback to basic correction
         try:
             return autopep8.fix_code(code, options={'aggressive': 2})
         except:
@@ -473,18 +486,54 @@ def enhanced_correct_code(code: str, issues: List[str]) -> str:
     """
     
     try:
-        # Use the OLD OpenAI API format
-        response = openai.ChatCompletion.create(  # Change this line
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful Python code assistant that improves code quality."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=2000,
-            temperature=0.2
-        )
+        # Updated Gemini API endpoint (try both formats)
+        endpoints = [
+            f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={GEMINI_API_KEY}",
+        ]
         
-        corrected_code = response.choices[0].message.content.strip()  # This line stays the same
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "contents": [{
+                "parts": [{
+                    "text": prompt
+                }]
+            }],
+            "generationConfig": {
+                "temperature": 0.2,
+                "maxOutputTokens": 2000,
+                "topP": 0.8,
+                "topK": 40
+            }
+        }
+        
+        # Try both endpoints
+        for url in endpoints:
+            try:
+                response = requests.post(url, headers=headers, json=data, timeout=30)
+                response.raise_for_status()
+                
+                result = response.json()
+                
+                # Extract the response text from the JSON structure
+                if 'candidates' in result and len(result['candidates']) > 0:
+                    if 'content' in result['candidates'][0]:
+                        corrected_code = result['candidates'][0]['content']['parts'][0]['text'].strip()
+                        break
+                    else:
+                        continue
+                else:
+                    continue
+                    
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 404:
+                    continue  # Try next endpoint
+                else:
+                    raise e
+        else:
+            raise Exception("All Gemini API endpoints failed")
         
         # Extract code from markdown code blocks if present
         if "```python" in corrected_code:
@@ -495,48 +544,172 @@ def enhanced_correct_code(code: str, issues: List[str]) -> str:
         return corrected_code
         
     except Exception as e:
-        print(f"OpenAI correction failed: {e}")
+        print(f"Gemini correction failed: {e}")
         # Fallback to autopep8
         try:
             return autopep8.fix_code(code, options={'aggressive': 2})
         except:
             return code
-
+        
 def generate_code_from_prompt(prompt):
     """Generate code based on user prompt with sarcastic response."""
     prompt_lower = prompt.lower()
     
-    # Check if prompt matches any known patterns
+    # Check if prompt matches any known patterns first
     for key in CODE_EXAMPLES:
         if key in prompt_lower:
             return CODE_EXAMPLES[key]["code"], CODE_EXAMPLES[key]["roast"]
     
-    # Try to generate code using the model for unknown prompts
-    try:
-        code_prompt = f"Write Python code to {prompt}. Include proper docstrings and follow PEP 8 guidelines."
-        code_output = code_generator(code_prompt, max_new_tokens=150, num_return_sequences=1, 
-                                   temperature=0.7, truncation=True)[0]['generated_text']
-        
-        # Extract just the code part (remove the prompt)
-        code = code_output.replace(code_prompt, "").strip()
-        
-        # Try to format the code
+    # Rule-based code generation for common patterns
+    code = None
+    roast = None
+    
+    # Prime number check
+    if any(word in prompt_lower for word in ['prime', 'primenumber', 'is prime', 'check prime']):
+        code = """def is_prime(n):
+    \"\"\"Check if a number is prime.\"\"\"
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+# Example usage
+print(is_prime(17))  # True
+print(is_prime(15))  # False"""
+        roast = "Prime number check? That's so basic, even my calculator can do that!"
+
+    # Fibonacci sequence
+    elif any(word in prompt_lower for word in ['fibonacci', 'fib', 'sequence']):
+        code = """def fibonacci(n):
+    \"\"\"Generate Fibonacci sequence up to n terms.\"\"\"
+    if n <= 0:
+        return []
+    elif n == 1:
+        return [0]
+    elif n == 2:
+        return [0, 1]
+    
+    sequence = [0, 1]
+    for i in range(2, n):
+        sequence.append(sequence[i-1] + sequence[i-2])
+    return sequence
+
+# Example usage
+print(fibonacci(10))  # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]"""
+        roast = "Fibonacci? Seriously? Did you just start learning programming yesterday?"
+
+    # Palindrome check
+    elif any(word in prompt_lower for word in ['palindrome', 'check palindrome', 'is palindrome']):
+        code = """def is_palindrome(s):
+    \"\"\"Check if a string is a palindrome.\"\"\"
+    s = ''.join(char.lower() for char in s if char.isalnum())
+    return s == s[::-1]
+
+# Example usage
+print(is_palindrome("racecar"))  # True
+print(is_palindrome("hello"))    # False"""
+        roast = "Palindrome check? That's like the 'Hello World' of string manipulation!"
+
+    # Factorial calculation
+    elif any(word in prompt_lower for word in ['factorial', 'fact', '!', 'calculate factorial']):
+        code = """def factorial(n):
+    \"\"\"Calculate factorial of a number.\"\"\"
+    if n < 0:
+        raise ValueError("Factorial is not defined for negative numbers")
+    if n == 0:
+        return 1
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
+
+# Example usage
+print(factorial(5))  # 120"""
+        roast = "Factorial? Wow, you're really pushing the boundaries of computational complexity!"
+
+    # Reverse string
+    elif any(word in prompt_lower for word in ['reverse', 'reverse string', 'backwards']):
+        code = """def reverse_string(s):
+    \"\"\"Reverse a string.\"\"\"
+    return s[::-1]
+
+# Example usage
+print(reverse_string("hello"))  # "olleh\""""
+        roast = "Reversing a string? That's so basic, even my toaster could do it!"
+
+    # Count vowels
+    elif any(word in prompt_lower for word in ['vowel', 'count vowel', 'count vowels']):
+        code = """def count_vowels(s):
+    \"\"\"Count vowels in a string.\"\"\"
+    vowels = "aeiouAEIOU"
+    return sum(1 for char in s if char in vowels)
+
+# Example usage
+print(count_vowels("hello world"))  # 3"""
+        roast = "Counting vowels? Are you writing a kindergarten-level text analyzer?"
+
+    # If no specific pattern matched, try to use the AI model with better filtering
+    if code is None:
         try:
-            code = autopep8.fix_code(code, options={'aggressive': 1})
-        except:
-            pass
-        
-        roast = random.choice([
-            f"I generated code for '{prompt}', but honestly, if you can't write this yourself, maybe programming isn't for you.",
-            f"Here's some code for '{prompt}'. Try to learn from it instead of just copying, okay?",
-            f"Wow, you really need help with '{prompt}'? This is pretty basic stuff.",
-            f"Generated code for '{prompt}'. Don't get too dependent on me now."
-        ])
-        
-        return code, roast
-    except Exception as e:
-        print(f"Code generation failed: {e}")
-        return f"# Could not generate code for: {prompt}", f"I could generate code for '{prompt}', but honestly, if you can't even describe what you need properly, maybe you should reconsider your life choices."
+            # Use a very specific prompt to get better results
+            code_prompt = f"# Python code only for: {prompt}\n# Complete function with docstring\n\n"
+            
+            code_output = code_generator(
+                code_prompt, 
+                max_new_tokens=100,
+                num_return_sequences=1, 
+                temperature=0.3,  # Lower temperature for less randomness
+                truncation=True,
+                pad_token_id=tokenizer.eos_token_id,
+                repetition_penalty=2.0  # Higher penalty to prevent repetition
+            )[0]['generated_text']
+            
+            # Extract just the code part
+            code = code_output.replace(code_prompt, "").strip()
+            
+            # Aggressive filtering of garbage output
+            lines = code.split('\n')
+            clean_lines = []
+            for line in lines:
+                # Skip lines that contain obvious garbage
+                if (not any(garbage in line for garbage in ['__main__', '__init__', '###', '***', '===', 'python.py', ' -a ', ' | ']) and
+                    not line.strip().startswith(('"', "'", '|', '\\', '/')) and
+                    len(line.strip()) > 2):
+                    clean_lines.append(line)
+                # Stop at first sign of serious garbage
+                if any(garbage in line for garbage in ['python.py', ' -a ', ' | ']):
+                    break
+            
+            code = '\n'.join(clean_lines).strip()
+            
+            # If the code is still garbage, fall back to examples
+            if (not code or len(code) < 20 or 
+                any(garbage in code for garbage in ['python.py', ' -a ', ' | ', '__main__'] * 2)):
+                code = CODE_EXAMPLES["hello world"]["code"]
+                roast = f"I tried to generate code for '{prompt}', but my AI brain is having a bad day. Here's 'Hello World' instead!"
+            else:
+                roast = random.choice([
+                    f"I generated some code for '{prompt}'. It might not be perfect, but it's something!",
+                    f"Here's some code for '{prompt}'. Don't expect miracles!",
+                    f"Code generation for '{prompt}' complete. I hope it makes sense!",
+                    f"Generated code for '{prompt}'. Fingers crossed!"
+                ])
+                
+        except Exception as e:
+            print(f"Code generation failed: {e}")
+            # Fallback to example code
+            code = CODE_EXAMPLES["hello world"]["code"]
+            roast = f"I tried to generate code for '{prompt}', but my AI brain had a meltdown. Here's 'Hello World' instead!"
+    
+    return code, roast
 
 def text_to_speech(text, roast_level="medium"):
     """Convert text to speech using ElevenLabs or fallback to system TTS."""
@@ -965,3 +1138,4 @@ def health_check():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
+

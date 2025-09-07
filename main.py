@@ -65,7 +65,7 @@ def load_css():
     .card {
         background: var(--dark-card);
         border-radius: 12px;
-        padding: 1.5rem;
+        padding: 1rem;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         border: 1px solid var(--dark-border);
         margin-bottom: 1rem;
@@ -422,20 +422,20 @@ def run_streamlit():
                                     st.markdown('</div>', unsafe_allow_html=True)
                             
                             # Show improved code
-                            if "corrected_code" in result and result["corrected_code"]:
-                                st.markdown("### ✅ Improved Code")
-                                st.markdown('<div class="improvement-container">', unsafe_allow_html=True)
-                                st.code(result["corrected_code"], language="python")
-                                st.markdown('</div>', unsafe_allow_html=True)
+                            # if "corrected_code" in result and result["corrected_code"]:
+                            #     st.markdown("### ✅ Improved Code")
+                            #     st.markdown('<div class="improvement-container">', unsafe_allow_html=True)
+                            #     st.code(result["corrected_code"], language="python")
+                            #     st.markdown('</div>', unsafe_allow_html=True)
                                 
-                                # Download option for fixed code
-                                st.download_button(
-                                    label="Download Improved Code",
-                                    data=result["corrected_code"],
-                                    file_name="improved_code.py",
-                                    mime="text/python",
-                                    use_container_width=True
-                                )
+                            #     # Download option for fixed code
+                            #     st.download_button(
+                            #         label="Download Improved Code",
+                            #         data=result["corrected_code"],
+                            #         file_name="improved_code.py",
+                            #         mime="text/python",
+                            #         use_container_width=True
+                            #     )
                         else:
                             st.error(f"Backend error: {response.status_code} - {response.text}")
                     except requests.exceptions.Timeout:
