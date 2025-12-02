@@ -1,0 +1,38 @@
+# Create requirements.txt in project root
+cat > requirements.txt << 'EOF'
+# Core Backend
+flask==2.3.3
+flask-cors==4.0.0
+flask-socketio==5.3.6
+python-socketio==5.11.2
+python-engineio==4.8.0
+gunicorn==21.2.0
+redis==5.0.1
+eventlet==0.33.3
+
+# AI/ML
+transformers==4.38.2
+torch==2.2.1
+accelerate==0.27.2
+datasets==2.18.0
+google-generativeai==0.3.2
+openai==1.12.0
+elevenlabs==0.2.0
+
+# Code Analysis
+pylint==2.17.7
+radon==6.0.1
+autopep8==2.0.4
+lizard==1.17.10
+javalang==0.13.0
+esprima==4.0.1
+
+# Frontend
+streamlit==1.31.0
+
+# Utilities
+python-dotenv==1.0.0
+requests==2.31.0
+numpy==1.24.4
+pandas==2.2.0
+EOF

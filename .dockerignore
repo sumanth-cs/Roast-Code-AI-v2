@@ -1,0 +1,59 @@
+# Create .dockerignore
+cat > .dockerignore << 'EOF'
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Backups
+*.bak
+
+# Logs
+*.log
+
+# Test files
+test*
+tests/
+
+# Docker ignore for build context
+Dockerfile*
+docker-compose*
+.env
+.env.*
+!/.env.example
+EOF
