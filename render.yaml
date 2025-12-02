@@ -1,0 +1,46 @@
+# render.yaml
+services:
+  # Backend Service
+  - type: web
+    name: roast-code-backend
+    env: docker
+    dockerfilePath: ./Dockerfile.backend
+    plan: free
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          name: roast-redis
+          type: redis
+          property: connectionString
+      - key: FLASK_DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  # Frontend Service
+  - type: web
+    name: roast-code-frontend
+    env: docker
+    dockerfilePath: ./Dockerfile.frontend
+    plan: free
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          name: roast-code-backend
+          type: web
+          property: host
+    autoDeploy: true
+
+  # Redis Service
+  - type: redis
+    name: roast-redis
+    plan: free
+    ipAllowList: []
