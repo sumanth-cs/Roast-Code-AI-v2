@@ -4,6 +4,7 @@ cat > .gitignore << EOL
 .env
 *.env
 env/
+.env.example
 
 # Python
 __pycache__/
