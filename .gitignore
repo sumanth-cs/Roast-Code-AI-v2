@@ -41,3 +41,8 @@ ENV/
 .DS_Store
 Thumbs.db
 EOLvenv/
+
+
+ml_models/
+*.safetensors
+*.bin
